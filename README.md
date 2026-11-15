@@ -100,8 +100,8 @@ pnpm skin:remove                          # 移除皮肤，回到默认外观
 
 | 皮肤 | 说明 | 安装 |
 | --- | --- | --- |
-| [remie-canvas-skin](https://github.com/momakoding/remie-canvas-skin) | 「蕾米」主题，换掉名称、头像、生成中的动图，并在「关于」页附带版权声明 | `pnpm skin:install https://github.com/momakoding/remie-canvas-skin.git` |
-| big-fat-fish | 即将推出 | 暂无 |
+| [magicanvas-remie-skin](https://github.com/momakoding/magicanvas-remie-skin) | 「蕾米」主题，换掉名称、头像、生成中的动图，并在「关于」页附带版权声明 | `pnpm skin:install https://github.com/momakoding/magicanvas-remie-skin.git` |
+| magicanvas-big_fat_fish-skin | 即将推出 | 暂无 |
 
 ### 自己做一套皮肤
 
