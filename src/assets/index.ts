@@ -1,1 +1,1 @@
-export * from "./mascot";
+export * from "./placeholder";

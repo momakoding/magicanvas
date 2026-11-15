@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { UiButton, UiModal } from "@/components/ui";
-import { MASCOT_URI } from "@/assets";
+import { skin, skinTitle } from "@/skin";
 
 const emit = defineEmits<{ close: [] }>();
 </script>
 
 <template>
-  <UiModal title="关于 Image Canvas" size="sm" @close="emit('close')">
+  <UiModal :title="`关于 ${skin.brand}`" size="sm" @close="emit('close')">
     <section class="about-modal__section about-modal__hero">
-      <img class="about-modal__mascot" :src="MASCOT_URI" alt="" />
+      <img class="about-modal__mascot" :src="skin.mascotUri" alt="" />
       <div>
-        <h3 class="about-modal__heading about-modal__heading--tight">Image Canvas</h3>
-        <p class="about-modal__text">一块用来生成图片的无限画布。在画布上写下想法，它会把想法画出来；生成的图片可以继续拖动、收藏，也可以当作参考图接着生成。</p>
+        <h3 class="about-modal__heading about-modal__heading--tight">{{ skinTitle }}</h3>
+        <p class="about-modal__text">{{ skin.tagline }}</p>
       </div>
     </section>
 
@@ -23,6 +23,11 @@ const emit = defineEmits<{ close: [] }>();
     <section class="about-modal__section">
       <h3 class="about-modal__heading">开源协议</h3>
       <p class="about-modal__text">本项目的源代码以 <a class="about-modal__link" href="https://opensource.org/license/mit" target="_blank" rel="noopener noreferrer">MIT</a> 协议开放，可以自由学习、使用、修改和商用。</p>
+    </section>
+
+    <section v-for="section in skin.aboutSections" :key="section.title" class="about-modal__section">
+      <h3 class="about-modal__heading">{{ section.title }}</h3>
+      <p v-for="(line, i) in section.paragraphs" :key="i" class="about-modal__text">{{ line }}</p>
     </section>
 
     <template #footer>

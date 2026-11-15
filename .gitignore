@@ -3,3 +3,5 @@ node_modules
 dist
 prototype
 src/text_constant.ts
+# 可选皮肤（独立仓库，含第三方版权内容），不得提交到本仓库
+skin

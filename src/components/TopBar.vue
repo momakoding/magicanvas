@@ -4,7 +4,7 @@ import ProjectMenu from "./ProjectMenu.vue";
 import { AboutDialog } from "./about-dialog";
 import { SettingsDialog } from "./settings-dialog";
 import { UiButton, UiPill } from "@/components/ui";
-import { MASCOT_URI } from "@/assets";
+import { skin } from "@/skin";
 import { fit, imageCount, projectCost, studio } from "@/stores";
 
 const count = computed(imageCount);
@@ -16,7 +16,7 @@ const openAbout = () => new AboutDialog().open();
 
 <template>
   <div class="top-bar__dock top-bar__dock--left">
-    <UiPill class="top-bar__brand"><img class="top-bar__mascot" :src="MASCOT_URI" alt="" />Image Canvas</UiPill>
+    <UiPill class="top-bar__brand"><img class="top-bar__mascot" :src="skin.mascotUri" alt="" />{{ skin.brand }}</UiPill>
     <ProjectMenu />
   </div>
   <div class="top-bar__dock top-bar__dock--right">

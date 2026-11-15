@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { Tip, UiButton } from "@/components/ui";
 import { pixelSize } from "@shared";
 import { dragPointer } from "@/lib";
+import { skin } from "@/skin";
 import { text } from "@/texts";
 import { addDraftInput, addLink, createDraft, discardNode, editNode, fitToImage, imageUrl, isDraftId, isFiltering, isUpload, isReady, matches, persistNodes, retryNode, setSel, studio, toWorld, toggleFav, type NodeView } from "@/stores";
 
@@ -110,7 +111,7 @@ function onDown(e: PointerEvent) {
       </span>
     </div>
     <template v-else-if="node.pending">
-      <img class="canvas-node__drawing" src="/img/drawing.svg" alt="" draggable="false" />
+      <img class="canvas-node__drawing" :src="skin.drawingUri" alt="" draggable="false" />
       <span class="canvas-node__drawing-label">{{ text("drawingLabel") }}</span>
     </template>
     <button class="canvas-node__fav" aria-label="收藏" @pointerdown.stop @click.stop="toggleFav([node])">★</button>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import CanvasNode from "@/components/CanvasNode.vue";
-import { MASCOT_URI } from "@/assets";
+import { skin } from "@/skin";
 import DraftNode from "@/components/DraftNode.vue";
 import { dragPointer } from "@/lib";
 import { DRAFT_ANCHOR, nodeById, removeLink, setSel, setView, studio, toWorld, uploadImages, type NodeView } from "@/stores";
@@ -116,7 +116,7 @@ function onDblClick(e: MouseEvent) {
   </div>
 
   <div v-show="studio.ready && !studio.nodes.length" class="canvas-view__empty">
-    <img class="canvas-view__empty-image" :src="MASCOT_URI" alt="" />双击画布，写下第一个想法
+    <img class="canvas-view__empty-image" :src="skin.mascotUri" alt="" />双击画布，写下第一个想法
   </div>
   <div class="canvas-view__hint">
     <kbd class="canvas-view__key">双击</kbd> 空白处写提示词 &nbsp; <kbd class="canvas-view__key">点击</kbd> 选中图后继续生成<br />
