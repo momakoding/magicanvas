@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { EditableArea, EditableInput, EditablePreview, EditableRoot, PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from "reka-ui";
 import { ref } from "vue";
+import { UiPill } from "@/components/ui";
 import { askConfirm, newProject, openProject, removeProject, renameProject, studio, toast } from "@/stores";
 
 const open = ref(false);
