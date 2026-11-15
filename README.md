@@ -86,9 +86,39 @@ data/
 
 > **重要提醒**：`settings.json` 文件中包含明文保存的接口密钥。为了保障你的资产安全，请切勿将 `data/` 目录提交至公开代码仓库或发送给他人。
 
+## 皮肤
+
+应用的名称、头像、生成中的动图和「关于」页的附加说明可以通过皮肤替换。皮肤是放在项目根目录 `skin/` 里的一个独立仓库，只含 `skin.json` 和图片，不含代码。`skin/` 已被 `.gitignore` 忽略，不会进入本仓库的提交。
+
+```bash
+pnpm skin:install <皮肤仓库的 git 地址>   # 克隆到 skin/
+pnpm skin:update                          # 拉取最新皮肤
+pnpm skin:remove                          # 移除皮肤，回到默认外观
+```
+
+### 推荐皮肤
+
+| 皮肤 | 说明 | 安装 |
+| --- | --- | --- |
+| [remie-canvas-skin](https://github.com/momakoding/remie-canvas-skin) | 「蕾米」主题，换掉名称、头像、生成中的动图，并在「关于」页附带版权声明 | `pnpm skin:install https://github.com/momakoding/remie-canvas-skin.git` |
+| big-fat-fish | 即将推出 | 暂无 |
+
+### 自己做一套皮肤
+
+`skin.json` 的字段：
+
+| 字段 | 说明 |
+| --- | --- |
+| `brand` | 顶栏和「关于」页显示的名称 |
+| `subtitle` | 名称后的副标题，可省略 |
+| `tagline` | 「关于」页的简介 |
+| `mascot` | 头像文件名，放在 `skin/` 下 |
+| `drawing` | 生成中的动图文件名，放在 `skin/` 下 |
+| `aboutSections` | 「关于」页附加段落，格式为 `[{ "title": "...", "paragraphs": ["..."] }]` |
+
 ## 开源协议
 
-本项目源代码基于 [MIT License](./LICENSE) 发布，不含任何第三方版权内容。
+本项目源代码基于 [MIT License](./LICENSE) 发布，不含任何第三方版权内容。皮肤由各自的仓库另行授权，不在本仓库的协议范围内。
 
 ## 制作团队
 
