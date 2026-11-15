@@ -11,7 +11,10 @@
     "dev:web": "vite",
     "typecheck": "vue-tsc --noEmit",
     "build": "vue-tsc --noEmit && vite build",
-    "start": "tsx server/index.ts"
+    "start": "tsx server/index.ts",
+    "skin:install": "node scripts/skin.mjs install",
+    "skin:update": "node scripts/skin.mjs update",
+    "skin:remove": "node scripts/skin.mjs remove"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
