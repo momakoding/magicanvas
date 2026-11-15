@@ -1,4 +1,5 @@
 data
 node_modules
 dist
+prototype
 src/text_constant.ts
