@@ -1,0 +1,3 @@
+const PLACEHOLDER_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\"><rect x=\"24\" y=\"24\" width=\"192\" height=\"192\" rx=\"40\" fill=\"#fce1ec\" stroke=\"#362436\" stroke-width=\"8\"/><path d=\"M70 170 L70 140 L150 60 L180 90 L100 170 Z\" fill=\"#fff6dd\" stroke=\"#362436\" stroke-width=\"8\" stroke-linejoin=\"round\"/><path d=\"M150 60 L165 45 L195 75 L180 90 Z\" fill=\"#f28aa9\" stroke=\"#362436\" stroke-width=\"8\" stroke-linejoin=\"round\"/></svg>";
+export const MASCOT_URI = "data:image/svg+xml;utf8," + encodeURIComponent(PLACEHOLDER_SVG);
+

@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+html {
+  font-feature-settings: "cv02", "cv11";
+}
+
+/* 设计令牌。各组件的 <style> 通过 @reference 引用本文件，用 @apply 组合这些工具类 */
+@theme static {
+  --font-sans:
+    "Inter var", "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+
+  --color-app: #fdf7f9;
+  --color-soft: #fceef3;
+  --color-hover: #fae3ec;
+  --color-rose: #ffe3ee;
+  --color-pink: #f69ab4;
+  --color-pink-deep: #ec5698;
+  --color-lavender: #c5c6ea;
+  --color-lavender-soft: #eef0fb;
+  --color-cream: #fff2b2;
+  --color-gold: #f5b301;
+  --color-highlight: #ffe14d;
+  --color-ink: #382738;
+  --color-ink-muted: #7e687b;
+  --color-ink-subtle: #a993a6;
+  --color-line: rgba(56, 39, 56, 0.1);
+  --color-line-strong: rgba(56, 39, 56, 0.18);
+  --color-mask: rgba(56, 39, 56, 0.45);
+  --color-danger: #d6336c;
+  --color-danger-soft: #fff5f7;
+  --color-danger-strong: #d6203a;
+
+  --shadow-float: 0 16px 40px rgba(56, 39, 56, 0.12);
+  --shadow-pill: 0 4px 14px rgba(56, 39, 56, 0.06);
+  --shadow-hard-2: 0 2px 0 var(--color-ink);
+  --shadow-hard-3: 0 3px 0 var(--color-ink);
+  --shadow-hard-5: 0 5px 0 var(--color-ink);
+  --shadow-panel: 0 4px 0 var(--color-ink), 0 16px 40px rgba(56, 39, 56, 0.12);
+  --shadow-modal: 0 6px 0 var(--color-ink), 0 16px 40px rgba(56, 39, 56, 0.12);
+  --shadow-active: 0 5px 0 var(--color-pink-deep), 0 0 0 5px rgba(236, 86, 152, 0.3);
+
+  --ease-pop: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-pop: pop 0.22s var(--ease-pop);
+  --animate-fade: fade 0.2s ease;
+  --animate-shimmer: shimmer 1.3s linear infinite;
+  --animate-float: float 3.6s ease-in-out infinite;
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.97);
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes float {
+    50% {
+      transform: translateY(-6px) rotate(1.5deg);
+    }
+  }
+}
+
+/* 吉祥物头像底色，多处使用 */
+@utility bg-mascot {
+  background-image: radial-gradient(circle at 30% 25%, #fff5f9, #fce1ec 70%, #e4e5f9);
+}
+
+@layer base {
+  html,
+  body {
+    @apply h-full overflow-hidden bg-app font-sans text-ink antialiased;
+  }
+  button,
+  input,
+  textarea {
+    @apply outline-none;
+  }
+  /* 所有可交互元素统一手型，禁用时恢复；组件里的 BEM 类另外显式写 cursor-pointer */
+  button,
+  a[href],
+  summary,
+  label[for],
+  [role="button"],
+  [role="tab"],
+  [role="option"],
+  [role="combobox"],
+  [role="radio"],
+  [role="menuitem"] {
+    @apply cursor-pointer;
+  }
+  button:disabled,
+  [aria-disabled="true"],
+  [data-disabled] {
+    @apply cursor-not-allowed;
+  }
+  :is(button, input, textarea, [role="combobox"], [role="radio"]):focus-visible {
+    @apply outline-2 outline-offset-2 outline-pink-deep;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full border-2 border-transparent bg-clip-padding;
+    background-color: rgba(56, 39, 56, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}
