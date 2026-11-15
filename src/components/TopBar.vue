@@ -5,9 +5,9 @@ import { AboutDialog } from "./about-dialog";
 import { SettingsDialog } from "./settings-dialog";
 import { UiButton, UiPill } from "@/components/ui";
 import { MASCOT_URI } from "@/assets";
-import { fit, isReady, projectCost, studio } from "@/stores";
+import { fit, imageCount, projectCost, studio } from "@/stores";
 
-const count = computed(() => studio.nodes.filter(isReady).length);
+const count = computed(imageCount);
 const cost = computed(() => projectCost());
 // 命令式打开设置弹窗：每次点击创建一个新实例，关闭后实例自行销毁
 const openSettings = () => new SettingsDialog().open();

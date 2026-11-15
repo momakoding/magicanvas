@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { AUTO } from "@shared";
 import { Tip, UiButton, UiField, UiSelect } from "@/components/ui";
 import { autoRatioOptions, makeSizeOptions, modelOptions, moveItem } from "./controls";
-import { deleteSel, download, regenerate, imageUrl, isUpload, lastSel, nodeById, priceOf, spawn, studio, toScreen, toast, toggleFav } from "@/stores";
+import { download, imageUrl, isUpload, lastSel, nodeById, priceOf, regenerate, removeSel, spawn, studio, toScreen, toast, toggleFav } from "@/stores";
 
 /** 每个选择组合各自保存写到一半的修改意见：切换选择、生成完成后自动选中新图，都不会把它清掉 */
 const drafts = reactive(new Map<string, string>());
@@ -54,6 +54,13 @@ function go() {
   drafts.delete(key.value);
 }
 function reuse() { text.value = anchor.value!.prompt; document.getElementById("barInput")?.focus(); toast("已填入提示词，可直接改"); }
+/** 重新生成：按输入框当前的配置提交；提示词留空时沿用原图的，旧图归档到资料库 */
+async function regen() {
+  const n = anchor.value, k = key.value;
+  if (!n) return;
+  const started = await regenerate(n, { prompt: text.value.trim(), model: studio.bar.model, ratio: ratio.value, size: isAuto.value ? AUTO : studio.bar.size });
+  if (started) drafts.delete(k);
+}
 </script>
 
 <template>
@@ -76,13 +83,15 @@ function reuse() { text.value = anchor.value!.prompt; document.getElementById("b
       <UiSelect v-model="studio.bar.ratio" class="action-bar__select" :options="autoRatioOptions" label="画幅" />
       <UiSelect v-if="!isAuto" v-model="studio.bar.size" class="action-bar__select action-bar__select--wide" :options="sizeOptions" label="画面尺寸" />
     </div>
-    <UiButton variant="primary" @click="go()">生成 · ${{ total.toFixed(3) }}</UiButton>
+    <div class="action-bar__row">
+      <UiButton v-if="!multi && !isUpload(anchor)" variant="yellow" class="action-bar__regen" @click="regen">重新生成</UiButton>
+      <UiButton variant="primary" class="action-bar__submit" @click="go()">生成 · ${{ total.toFixed(3) }}</UiButton>
+    </div>
     <div class="action-bar__row action-bar__row--tools">
-      <UiButton v-if="!multi && !isUpload(anchor)" variant="ghost" @click="regenerate(anchor)">再来一版</UiButton>
       <UiButton variant="ghost" @click="toggleFav(parents)">{{ anchor.fav ? "已收藏" : "收藏" }}</UiButton>
       <UiButton v-if="!multi && !isUpload(anchor)" variant="ghost" @click="reuse">复用提示词</UiButton>
       <UiButton v-if="!multi" variant="ghost" @click="download(anchor)">下载</UiButton>
-      <UiButton variant="ghost" @click="deleteSel">删除</UiButton>
+      <UiButton variant="ghost" @click="removeSel">删除</UiButton>
     </div>
   </div>
 </template>
@@ -96,6 +105,7 @@ function reuse() { text.value = anchor.value!.prompt; document.getElementById("b
 .action-bar__row--tools { @apply flex-wrap justify-between; }
 .action-bar__select { @apply min-w-0 flex-1; }
 .action-bar__select--wide { @apply flex-[2.2]; }
+.action-bar__regen, .action-bar__submit { @apply flex-1; }
 .action-bar__order { @apply flex flex-wrap gap-2 empty:hidden; }
 .action-bar__chip { @apply relative flex flex-col items-center gap-0.5; }
 .action-bar__chip-image { @apply size-12 rounded-lg border-2 border-ink object-cover; }

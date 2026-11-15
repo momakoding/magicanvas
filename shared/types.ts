@@ -27,6 +27,8 @@ export interface NodeRec {
   file?: string;
   /** upload 表示用户上传的图片；缺省为生成的图片。只能由后端上传接口设置 */
   kind?: "upload";
+  /** 已归档：离开画布，只在资料库里灰色显示；真正的删除只能在资料库里进行 */
+  archived?: boolean;
   /** 没有图片的节点才有：生成失败（或被中断）的原因。保存下来是为了不丢掉用户写的提示词 */
   failed?: string;
   failKind?: GenErrorKind;

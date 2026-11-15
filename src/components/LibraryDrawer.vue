@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { Tip, UiButton, UiField } from "@/components/ui";
-import { focusNode, imageUrl, isReady, isUpload, matches, nodeById, setSel, studio, uploadImages } from "@/stores";
+import { focusNode, imageUrl, isReady, isUpload, matches, nodeById, purgeNode, setSel, studio, uploadImages } from "@/stores";
 
 const picker = ref<HTMLInputElement>();
 const over = ref(false);
 
-const all = computed(() => studio.nodes.filter(isReady).sort((a, b) => b.t - a.t));
+/** 资料库 = 画布上的图 + 已归档的图（灰色，可彻底删除） */
+const all = computed(() => [...studio.nodes, ...studio.archive].filter(isReady).sort((a, b) => b.t - a.t));
 const tabAll = computed(() => all.value.filter(n => (studio.libTab === "upload") === isUpload(n)));
 const list = computed(() => tabAll.value.filter(matches));
 const emptyText = computed(() => (studio.libTab === "upload" && !tabAll.value.length ? "还没有上传图片，点上方按钮或把图片拖进来" : "没有匹配的图"));
@@ -57,7 +58,13 @@ function onDrop(e: DragEvent) {
     </div>
     <div class="library-drawer__grid">
       <Tip v-for="n in list" :key="n.id" :text="n.prompt" side="left">
-        <button class="library-drawer__tile" @click="pick(n.id)"><img class="library-drawer__thumb" :src="imageUrl(n)" alt="" /><span v-if="n.fav" class="library-drawer__star">★</span></button>
+        <div class="library-drawer__tile" :class="{ 'library-drawer__tile--archived': n.archived }">
+          <button class="library-drawer__thumb-btn" :disabled="!!n.archived" @click="pick(n.id)">
+            <img class="library-drawer__thumb" :src="imageUrl(n)" alt="" draggable="false" />
+            <span v-if="n.fav" class="library-drawer__star">★</span>
+          </button>
+          <button v-if="n.archived" class="library-drawer__delete" aria-label="彻底删除这张图片" @click="purgeNode(n)">×</button>
+        </div>
       </Tip>
       <div v-if="!list.length" class="library-drawer__empty">{{ emptyText }}</div>
     </div>
@@ -87,8 +94,13 @@ function onDrop(e: DragEvent) {
 .library-drawer__upload { @apply h-[30px] flex-none; }
 
 .library-drawer__grid { @apply grid flex-1 grid-cols-3 content-start gap-2 overflow-auto; }
-.library-drawer__tile { @apply relative aspect-square cursor-pointer overflow-hidden rounded-xl border-2 border-line-strong p-0 hover:border-pink-deep; }
+.library-drawer__tile { @apply relative aspect-square; }
+.library-drawer__tile--archived .library-drawer__thumb-btn { @apply border-line-strong; }
+.library-drawer__tile--archived .library-drawer__thumb { @apply opacity-45 grayscale; }
+.library-drawer__thumb-btn { @apply relative size-full cursor-pointer overflow-hidden rounded-xl border-2 border-line-strong p-0 enabled:hover:border-pink-deep disabled:cursor-default; }
 .library-drawer__thumb { @apply block size-full object-cover; }
 .library-drawer__star { @apply absolute right-1 top-0.5 text-[13px] text-gold [text-shadow:0_1px_0_#fff]; }
+.library-drawer__delete { @apply absolute right-1 top-1 hidden size-[22px] cursor-pointer items-center justify-center rounded-full border-[1.5px] border-ink bg-white text-sm leading-none text-ink-muted hover:border-danger hover:bg-danger hover:text-white; }
+.library-drawer__tile:hover .library-drawer__delete { @apply flex; }
 .library-drawer__empty { @apply col-span-full py-[30px] text-center text-[12.5px] text-ink-subtle; }
 </style>

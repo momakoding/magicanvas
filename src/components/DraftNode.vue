@@ -4,12 +4,12 @@ import { AUTO, nodeSize } from "@shared";
 import { UiButton, UiField, UiSelect } from "@/components/ui";
 import { autoRatioOptions, makeSizeOptions, modelOptions, moveItem } from "./controls";
 import { dragPointer } from "@/lib";
-import { DRAFT_W, imageUrl, isReady, nodeById, priceOf, removeDraft, spawn, studio, toWorld, toast, type Draft } from "@/stores";
+import { DRAFT_W, anyNodeById, imageUrl, isReady, priceOf, removeDraft, spawn, studio, toWorld, toast, type Draft } from "@/stores";
 
 const props = defineProps<{ draft: Draft }>();
 const draft = props.draft;
 
-const inputs = computed(() => draft.inputs.map(nodeById).filter((n): n is NonNullable<typeof n> => !!n && isReady(n)));
+const inputs = computed(() => draft.inputs.map(anyNodeById).filter((n): n is NonNullable<typeof n> => !!n && isReady(n)));
 /** 选「自动」时跟随第一张参考图的画幅，没有参考图就用默认画幅 */
 const ratio = computed(() => (draft.ratio === AUTO ? inputs.value[0]?.ratio ?? studio.settings!.defaultRatio : draft.ratio));
 const isAuto = computed(() => draft.ratio === AUTO);

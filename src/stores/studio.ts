@@ -24,6 +24,8 @@ export const studio = reactive({
   projects: [] as ProjectSummary[],
   project: null as ProjectRec | null,
   nodes: [] as NodeView[],
+  /** 已归档的图片节点：离开画布，只在资料库里灰色显示，可在资料库里彻底删除 */
+  archive: [] as NodeView[],
   /** 选择顺序即融合顺序 */
   sel: [] as string[],
   view: { x: 0, y: 0, s: 1 } as View,
@@ -54,12 +56,16 @@ export function toast(msg: string) {
 
 /* ---------- 查询 ---------- */
 export const nodeById = (id: string) => studio.nodes.find(n => n.id === id);
+/** 画布上或已归档的节点：归档图片的文件还在，仍能当作生成参考图 */
+export const anyNodeById = (id: string) => nodeById(id) ?? studio.archive.find(n => n.id === id);
 export const lastSel = () => nodeById(studio.sel[studio.sel.length - 1]);
 export const isReady = (n: NodeView) => !n.pending && !!n.file;
 export const isUpload = (n: NodeView) => n.kind === "upload";
 export const imageUrl = (n: NodeView) => (isReady(n) ? api.imageUrl(n) : "");
 export const priceOf = (model: string) => studio.settings?.models.find(m => m.id === model)?.price ?? 0;
 export const projectCost = () => studio.nodes.filter(isReady).reduce((a, n) => a + n.cost, 0);
+/** 资料库里的图片总数：画布上的加已归档的 */
+export const imageCount = () => studio.nodes.filter(isReady).length + studio.archive.filter(isReady).length;
 export const isFiltering = () => !!studio.query || studio.filter === "fav";
 export const matches = (n: NodeView) => (studio.filter === "all" || n.fav) && (!studio.query || n.prompt.includes(studio.query));
 
@@ -159,7 +165,9 @@ export async function openProject(id: string) {
   await flushView(); await flushDrafts();
   const { project, nodes, drafts } = await api.project(id);
   studio.project = project; localStorage.setItem(LAST_KEY, id);
-  studio.nodes = nodes;
+  // 归档的节点不进画布，只留在资料库里
+  studio.nodes = nodes.filter(n => !n.archived);
+  studio.archive = nodes.filter(n => !!n.archived);
   studio.sel = []; resetBar();
   // 草稿里引用的参考图如果已被删除，就去掉那一项
   const validIds = new Set(nodes.filter(n => n.file).map(n => n.id));
@@ -206,6 +214,15 @@ async function persistPlaceholders(list: NodeView[]) {
 }
 function overlaps(x: number, y: number, w: number, h: number) {
   return studio.nodes.some(n => x < n.x + n.w + 24 && x + w + 24 > n.x && y < n.y + n.h + 24 && y + h + 24 > n.y);
+}
+/** 归档：图片离开画布，记录和文件都保留，在资料库里灰色显示；真正的删除只能在资料库里 */
+function archiveNodes(list: NodeView[]) {
+  const ids = new Set(list.map(n => n.id));
+  list.forEach(n => (n.archived = true));
+  studio.nodes = studio.nodes.filter(n => !ids.has(n.id));
+  studio.archive = [...list.filter(isReady), ...studio.archive];
+  studio.sel = studio.sel.filter(id => !ids.has(id));
+  persistNodes(list);
 }
 
 export interface SpawnOpts { parents: NodeView[]; prompt: string; at?: { x: number; y: number }; /** 严格放在 at 指定的位置，不再为避开其他节点而下移 */ exact?: boolean; model: string; ratio: string; size: string; n: number }
@@ -326,21 +343,37 @@ export function fitToImage(n: NodeView, pw: number, ph: number) {
   n.x += (n.w - w) / 2; n.y += (n.h - h) / 2; n.w = w; n.h = h; n.ratio = nearestRatio(pw, ph);
   void persistNodes([n]);
 }
-/** 再来一版：确认后丢弃当前图片，按同样的输入在原位置重新生成；失败则保留原图 */
-export async function regenerate(n: NodeView) {
-  if (!isReady(n)) return;
-  if (!await askConfirm("再来一版会删除当前这张图片，并按同样的输入重新生成。继续吗？", { title: "再来一版", ok: "继续" })) return;
-  setSel([]);
-  void runSlots([n], n.parents.filter(p => nodeById(p)));
+export interface RegenOpts { prompt?: string; model?: string; ratio?: string; size?: string }
+/**
+ * 重新生成：确认后当前图片归档到资料库（灰色标记，可在资料库彻底删除），
+ * 原位置按操作栏当前的配置生成新版本；提示词留空时沿用原来的提示词。
+ * 返回是否真的开始生成（用户取消确认则没开始）。
+ */
+export async function regenerate(n: NodeView, opts: RegenOpts = {}): Promise<boolean> {
+  if (!isReady(n)) return false;
+  if (!await askConfirm("重新生成会把当前图片移入资料库（灰色标记，可在资料库彻底删除），并在原位置生成新版本：提示词留空时沿用原来的提示词，模型、画幅和尺寸按当前选择。继续吗？", { title: "重新生成", ok: "继续" })) return false;
+  const ratio = opts.ratio ?? n.ratio, model = opts.model ?? n.model, size = opts.size ?? n.size;
+  const [w, h] = nodeSize(ratio);
+  const slot = reactive<NodeView>({
+    id: uid("n"), projectId: n.projectId,
+    x: n.x + (n.w - w) / 2, y: n.y + (n.h - h) / 2, w, h,
+    ratio, size, model, prompt: opts.prompt?.trim() || n.prompt,
+    parents: [...n.parents], fav: false, t: Date.now(), cost: priceOf(model), pending: true
+  });
+  archiveNodes([n]);
+  studio.nodes.push(slot);
+  await persistPlaceholders([slot]);
+  void runSlots([slot], slot.parents.filter(p => anyNodeById(p)));
+  return true;
 }
 export function retryNode(n: NodeView) {
   if (n.pending) return;
-  void runSlots([n], n.parents.filter(p => nodeById(p)));
+  void runSlots([n], n.parents.filter(p => anyNodeById(p)));
 }
 /** 失败节点“返回编辑”：在原位置换成创作节点，带回提示词、参考图和参数，改完再生成 */
 export function editNode(n: NodeView) {
   if (isReady(n) || n.pending) return;
-  const parentIds = n.parents.filter(p => { const parent = nodeById(p); return !!parent && isReady(parent); });
+  const parentIds = n.parents.filter(p => { const parent = anyNodeById(p); return !!parent && isReady(parent); });
   const draft = createDraft({ x: n.x, y: n.y + DRAFT_ANCHOR }, parentIds);
   draft.text = n.prompt; draft.model = n.model; draft.ratio = n.size === AUTO ? AUTO : n.ratio; draft.size = n.size;
   studio.nodes = studio.nodes.filter(other => other !== n);
@@ -438,14 +471,25 @@ export async function uploadImages(files: File[], at?: { x: number; y: number })
   if (!failed) toast(`已上传 ${done.length} 张图片`);
 }
 
-export async function deleteSel() {
+/** 画布上的「删除」：图片移入资料库灰色标记，画布上不再显示；彻底删除只能在资料库里 */
+export async function removeSel() {
   const ids = [...studio.sel]; if (!ids.length || !studio.project) return;
-  if (!await askConfirm(ids.length > 1 ? `删除选中的 ${ids.length} 张图片？此操作不可恢复。` : "删除这张图片？此操作不可恢复。", { title: "删除图片", ok: "删除" })) return;
-  const pid = studio.project.id;
-  studio.nodes = studio.nodes.filter(n => !ids.includes(n.id));
-  studio.nodes.forEach(n => (n.parents = n.parents.filter(p => !ids.includes(p))));
-  studio.sel = [];
-  try { await api.deleteNodes(pid, ids); await refreshProjects(); } catch (e) { toast("删除失败：" + (e as Error).message); }
+  if (!await askConfirm(ids.length > 1 ? `选中的 ${ids.length} 张图片将移入资料库（灰色标记），画布上不再显示；彻底删除请在资料库里进行。` : "这张图片将移入资料库（灰色标记），画布上不再显示；彻底删除请在资料库里进行。", { title: "移入资料库", ok: "移入" })) return;
+  archiveNodes(ids.map(nodeById).filter((n): n is NodeView => !!n));
+  toast("已移入资料库");
+}
+/** 资料库里的彻底删除：节点记录和图片文件一并删掉，不可恢复 */
+export async function purgeNode(n: NodeView) {
+  if (!n.archived || !studio.project) return;
+  if (!await askConfirm("彻底删除这张图片？文件会一并删除，此操作不可恢复。", { title: "删除图片", ok: "删除" })) return;
+  try {
+    await api.deleteNodes(studio.project.id, [n.id]);
+    studio.archive = studio.archive.filter(x => x.id !== n.id);
+    // 引用链同步清理：画布节点的参考、创作节点的参考图
+    studio.nodes.forEach(x => (x.parents = x.parents.filter(p => p !== n.id)));
+    studio.drafts.forEach(d => (d.inputs = d.inputs.filter(i => i !== n.id)));
+    refreshProjects().catch(() => undefined);
+  } catch (e) { toast("删除失败：" + (e as Error).message); }
 }
 export function toggleFav(list: NodeView[]) {
   const to = !list.every(n => n.fav);

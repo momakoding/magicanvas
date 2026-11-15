@@ -120,7 +120,7 @@ function onDblClick(e: MouseEvent) {
   </div>
   <div class="canvas-view__hint">
     <kbd class="canvas-view__key">双击</kbd> 空白处写提示词 &nbsp; <kbd class="canvas-view__key">点击</kbd> 选中图后继续生成<br />
-    <kbd class="canvas-view__key">Shift</kbd>+点击 依次选多张，合并时按选择顺序 &nbsp; <kbd class="canvas-view__key">滚轮</kbd> 缩放 &nbsp; <kbd class="canvas-view__key">Del</kbd> 删除<br />
+    <kbd class="canvas-view__key">Shift</kbd>+点击 依次选多张，合并时按选择顺序 &nbsp;     <kbd class="canvas-view__key">滚轮</kbd> 缩放 &nbsp; <kbd class="canvas-view__key">Del</kbd> 删除：移入资料库<br />
     <kbd class="canvas-view__key">拖入</kbd> 图片文件上传，作为参考图生成 &nbsp; <kbd class="canvas-view__key">拖右侧圆点</kbd> 连线：落在图上是关联，落在创作节点上是接入参考图，落在空白处新建创作节点；双击连线删除
   </div>
 </template>

@@ -2,7 +2,7 @@
 import { onBeforeUnmount, onMounted } from "vue";
 import { TooltipProvider } from "reka-ui";
 import { ActionBar, CanvasView, DialogHost, FailDetailModal, LibraryDrawer, SeedPopover, ToastHost, TopBar, UiButton } from "@/components";
-import { deleteSel, init, setSel, studio } from "@/stores";
+import { init, removeSel, setSel, studio } from "@/stores";
 
 function onKey(e: KeyboardEvent) {
   // 弹窗打开或正在输入时，不触发画布快捷键
@@ -13,7 +13,7 @@ function onKey(e: KeyboardEvent) {
     document.querySelector("[role=dialog], [role=alertdialog]")
   )
     return;
-  if (e.key === "Delete" || e.key === "Backspace") void deleteSel();
+  if (e.key === "Delete" || e.key === "Backspace") void removeSel();
   if (e.key === "Escape") {
     setSel([]);
     studio.seed.open = false;

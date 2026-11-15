@@ -51,6 +51,7 @@ function cleanNode(pid: string, r: any): NodeRec {
     failed: typeof r.failed === "string" && r.failed ? r.failed.slice(0, 2000) : undefined,
     failKind: GEN_ERROR_KINDS.includes(r.failKind) ? r.failKind : undefined,
     failDetail: typeof r.failDetail === "string" && r.failDetail ? r.failDetail.slice(0, 20000) : undefined,
+    archived: r.archived === true || undefined,
   };
 }
 
